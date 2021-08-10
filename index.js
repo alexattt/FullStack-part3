@@ -5,6 +5,12 @@ const cors = require('cors')
 const app = express()
 const Person = require('./models/person')
 
+//gotta change frontend aka error handling in personService
+//then after all these changes have to do fronted build
+//copy build folder in backend here
+//push all changes to git, both front and back
+//add that heroku config stuff where I add heroku api link
+//then deploy everything
 
 app.use(express.json())
 app.use(cors())
@@ -46,13 +52,28 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndRemove(request.params.id)
-      .then(result => {
+        .then(result => {
         response.status(204).end()
-      })
-      .catch(error => next(error))
-  })
+        })
+        .catch(error => next(error))
+})
 
-app.post('/api/persons', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const person = {
+        name: body.name,
+        number: body.number,
+    }
+
+    Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true })
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
+})
+
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name) {
@@ -72,9 +93,11 @@ app.post('/api/persons', (request, response) => {
         number: body.number,
     })
 
-    person.save().then(savedPerson => {
+    person.save()
+    .then(savedPerson => {
         response.json(savedPerson)
     })
+    .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
@@ -85,9 +108,11 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
 
-    if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'malformatted id' })
-    } 
+    if (error.name === 'CastError' && error.kind == 'ObjectId') {
+        return response.status(400).send({ error: 'Malformatted id' })
+    }  else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    }
 
     next(error)
 }
