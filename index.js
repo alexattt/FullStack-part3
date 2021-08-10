@@ -5,13 +5,6 @@ const cors = require('cors')
 const app = express()
 const Person = require('./models/person')
 
-//gotta change frontend aka error handling in personService
-//then after all these changes have to do fronted build
-//copy build folder in backend here
-//push all changes to git, both front and back
-//add that heroku config stuff where I add heroku api link
-//then deploy everything
-
 app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
