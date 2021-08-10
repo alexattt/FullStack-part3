@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
@@ -9,17 +11,17 @@ app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
 
-morgan.token('body', function (req, res) { 
+morgan.token('body', function (req, res) {
   return [
     JSON.stringify(req.body)
-  ] 
+  ]
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
-  
+
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(person => {
     response.json(person)
@@ -70,14 +72,14 @@ app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name) {
-    return response.status(400).json({ 
-      error: 'Person name missing' 
+    return response.status(400).json({
+      error: 'Person name missing'
     })
   }
 
   if (!body.number) {
-    return response.status(400).json({ 
-      error: 'Person number missing' 
+    return response.status(400).json({
+      error: 'Person number missing'
     })
   }
 
@@ -101,7 +103,7 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+  if (error.name === 'CastError' && error.kind === 'ObjectId') {
     return response.status(400).send({ error: 'Malformatted id' })
   }  else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
